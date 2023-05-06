@@ -12,6 +12,7 @@
 
 #include "VertexData.h"
 #include "ShaderSource.h"
+#include "Texture2D.h"
 
 using namespace std;
 
@@ -23,8 +24,15 @@ static void error_callback(int error, const char* description)
 
 GLFWwindow* window;
 GLuint vertex_shader, fragment_shader, program;
-GLint mvp_location, time_location, vpos_location, vcol_location;
+GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
+Texture2D* texture2d= nullptr;
+
+//创建Texture
+void CreateTexture(std::string image_file_path)
+{
+    texture2d = Texture2D::LoadFromFile(image_file_path);
+}
 
 /// 初始化OpenGL
 void init_opengl()
@@ -52,6 +60,7 @@ void init_opengl()
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
     glfwSwapInterval(1);
 }
+
 
 /// 编译、链接Shader
 void compile_shader()
@@ -115,12 +124,17 @@ void processInput(GLFWwindow *window)
 int main(int argc, char **argv)
 {
     init_opengl();
+
+    CreateTexture(R"(E:\GitHub\cmake-demo-game\resources\images\Space1.jpg)");
+
     compile_shader();
     //获取shader属性ID
     mvp_location = glGetUniformLocation(program, "u_mvp");
     time_location = glGetUniformLocation(program, "u_time");
+    diffuse_texture_location = glGetUniformLocation(program, "u_diffuse_texture");
     vpos_location = 0;
     vcol_location = 1;
+    a_uv_location = 3;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -148,6 +162,9 @@ int main(int argc, char **argv)
         //指定GPU程序(就是指定顶点着色器、片段着色器)
         glUseProgram(program);
         {
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);//开启背面剔除
+
             //启用顶点Shader属性(a_pos)，指定与顶点坐标数据进行关联
             glEnableVertexAttribArray(vpos_location);
             glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(glm::vec3), kPositions);
@@ -156,13 +173,25 @@ int main(int argc, char **argv)
             glEnableVertexAttribArray(vcol_location);
             glVertexAttribPointer(vcol_location, 3, GL_FLOAT, false, sizeof(glm::vec4), kColors);
 
+            //启用顶点Shader属性(a_uv)，指定与顶点UV数据进行关联
+            glEnableVertexAttribArray(a_uv_location);
+            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(glm::vec2), kUvs);
             //上传mvp矩阵
             glUniformMatrix4fv(mvp_location, 1, GL_FALSE, &mvp[0][0]);
 
             glUniform1f(time_location, m_time);
 
+            //贴图设置
+            //激活纹理单元0
+            //设置Shader程序从纹理单元0读取颜色数据
+            glUniform1i(diffuse_texture_location, 0);
+            glActiveTexture(GL_TEXTURE0 + 0);
+            //将加载的图片纹理句柄，绑定到纹理单元0的Texture2D上。
+            glBindTexture(GL_TEXTURE_2D, texture2d->gl_texture_id_);
+            // glBindSampler(0, linearFiltering);
+
             //上传顶点数据并进行绘制
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawArrays(GL_TRIANGLES, 0, sizeof(kPositions)/sizeof(glm::vec3));
         }
         m_time += 0.01f;
         glfwSwapBuffers(window);

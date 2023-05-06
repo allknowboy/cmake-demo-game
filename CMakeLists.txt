@@ -33,11 +33,22 @@ set (GLM_DIR ${3RD_DIR}/glm)
 # 添加头文件搜索路径
 include_directories (${GLM_DIR})
 
+# stb
+set (STB_DIR ${3RD_DIR}/stb)
+# 添加头文件搜索路径
+include_directories (${STB_DIR})
+
 
 # 设置MSVC编译编码
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 
-add_executable(${PROJECT_NAME} src/VertexData.h src/main.cpp)
+add_executable(${PROJECT_NAME}
+src/ShaderSource.h
+src/VertexData.h
+src/Texture2D.h
+src/Texture2D.cpp
+src/main.cpp
+)
 
 # 添加链接库
 target_link_libraries(${PROJECT_NAME} OpenGL32 glfw glad easy_profiler)
