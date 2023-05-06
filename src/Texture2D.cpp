@@ -38,9 +38,11 @@ Texture2D* Texture2D::LoadFromFile(std::string& image_file_path)
     glBindTexture(GL_TEXTURE_2D, texture2d->gl_texture_id_);
     //3. 将图片rgb数据上传到GPU;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture2d->width_, texture2d->height_, 0, texture2d->gl_texture_format_, GL_UNSIGNED_BYTE, data);
-    //4. 指定放大，缩小滤波方式，线性滤波，即放大缩小的插值方式;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
     //释放图片文件内存
     stbi_image_free(data);
     return texture2d;

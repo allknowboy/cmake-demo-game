@@ -26,7 +26,8 @@ GLFWwindow* window;
 GLuint vertex_shader, fragment_shader, program;
 GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
-Texture2D* texture2d= nullptr;
+Texture2D* texture2d = nullptr;
+float m_rotateX = .0f, m_rotateY = .0f, m_rotateZ = .0f;
 
 //创建Texture
 void CreateTexture(std::string image_file_path)
@@ -125,7 +126,7 @@ int main(int argc, char **argv)
 {
     init_opengl();
 
-    CreateTexture(R"(E:\GitHub\cmake-demo-game\resources\images\Space1.jpg)");
+    CreateTexture(R"(D:\GitHub\cmake-demo-game\resources\images\cube.png)");
 
     compile_shader();
     //获取shader属性ID
@@ -134,7 +135,7 @@ int main(int argc, char **argv)
     diffuse_texture_location = glGetUniformLocation(program, "u_diffuse_texture");
     vpos_location = 0;
     vcol_location = 1;
-    a_uv_location = 3;
+    a_uv_location = 2;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -150,12 +151,15 @@ int main(int argc, char **argv)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glClearColor(49.f/255, 77.f/255, 121.f/255, 1.f);
 
+        m_rotateX += 0.1f;
+        m_rotateY += 0.5f;
+        m_rotateZ += 0.3f;
         //坐标系变换
         glm::mat4 trans = glm::translate(glm::vec3(0, 0, 0)); //不移动顶点坐标;
-        glm::mat4 rotation = glm::eulerAngleYXZ(glm::radians(0.f), glm::radians(0.f), glm::radians(0.f)); //使用欧拉角旋转;
+        glm::mat4 rotation = glm::eulerAngleYXZ(glm::radians(m_rotateX), glm::radians(m_rotateY), glm::radians(m_rotateZ)); //使用欧拉角旋转;
         glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)); //缩放;
         model = trans * scale * rotation;
-        view = glm::lookAt(glm::vec3(0, 0, 200), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        view = glm::lookAt(glm::vec3(0, 0, 300), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         projection = glm::perspective(glm::radians(60.f), ratio, 1.f, 1000.f);
         mvp = projection * view * model;
 
