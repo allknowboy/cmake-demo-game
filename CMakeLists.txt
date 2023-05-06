@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(myGame)
+project(cmake-demo-game)
 
 set (CMAKE_CXX_STAND 11)
 

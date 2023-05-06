@@ -37,11 +37,11 @@ void init_opengl()
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     //创建窗口
-    window = glfwCreateWindow(1280, 960, "Simple example", NULL, NULL);
+    window = glfwCreateWindow(960, 640, "Simple example", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
