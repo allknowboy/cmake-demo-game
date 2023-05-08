@@ -28,6 +28,7 @@ GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol
 float m_time = 0.f;
 Texture2D* texture2d = nullptr;
 float m_rotateX = .0f, m_rotateY = .0f, m_rotateZ = .0f;
+GLuint kVBO, kEBO;
 
 //创建Texture
 void CreateTexture(std::string image_file_path)
@@ -122,6 +123,24 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 }
 
+//创建VBO和EBO
+void GeneratorBufferObject()
+{
+    //在GPU上创建缓冲区对象
+    glGenBuffers(1, &kVBO);
+    //将缓冲区对象指定为顶点缓冲区对象
+    glBindBuffer(GL_ARRAY_BUFFER, kVBO);
+    //上传顶点数据到缓冲区对象
+    glBufferData(GL_ARRAY_BUFFER, kVertexRemoveDumplicateVector.size() * sizeof(Vertex), &kVertexRemoveDumplicateVector[0], GL_STATIC_DRAW);
+
+    //在GPU上创建缓冲区对象
+    glGenBuffers(1, &kEBO);
+    //将缓冲区对象指定为顶点索引缓冲区对象
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, kEBO);
+    //上传顶点索引数据到缓冲区对象
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, kVertexIndexVector.size() * sizeof(unsigned short), &kVertexIndexVector[0], GL_STATIC_DRAW);
+}
+
 int main(int argc, char **argv)
 {
     VertexRemoveDumplicate();
@@ -129,6 +148,8 @@ int main(int argc, char **argv)
     init_opengl();
 
     CreateTexture(R"(E:\GitHub\cmake-demo-game\resources\images\cube.png)");
+
+    GeneratorBufferObject();
 
     compile_shader();
     //获取shader属性ID
@@ -172,16 +193,18 @@ int main(int argc, char **argv)
             glEnable(GL_CULL_FACE);//开启背面剔除
 
             //启用顶点Shader属性(a_pos)，指定与顶点坐标数据进行关联
+            //指定当前使用的VBO
+            glBindBuffer(GL_ARRAY_BUFFER, kVBO);
             glEnableVertexAttribArray(vpos_location);
-            glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(Vertex), (&kVertexRemoveDumplicateVector[0]));
+            glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(Vertex), 0);
 
             //启用顶点Shader属性(a_color)，指定与顶点颜色数据进行关联
             glEnableVertexAttribArray(vcol_location);
-            glVertexAttribPointer(vcol_location, 4, GL_FLOAT, false, sizeof(Vertex), ((float*)(&kVertexRemoveDumplicateVector[0])) + 3);
+            glVertexAttribPointer(vcol_location, 4, GL_FLOAT, false, sizeof(Vertex), (void*)(sizeof(float)*3));
 
             //启用顶点Shader属性(a_uv)，指定与顶点UV数据进行关联
             glEnableVertexAttribArray(a_uv_location);
-            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(Vertex), ((float*)(&kVertexRemoveDumplicateVector[0])) + 3 + 4);
+            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(Vertex), (void*)(sizeof(float)*(3 + 4)));
             //上传mvp矩阵
             glUniformMatrix4fv(mvp_location, 1, GL_FALSE, &mvp[0][0]);
 
@@ -196,9 +219,9 @@ int main(int argc, char **argv)
             glBindTexture(GL_TEXTURE_2D, texture2d->gl_texture_id_);
             // glBindSampler(0, linearFiltering);
 
-            //上传顶点数据并进行绘制
-            // glDrawArrays(GL_TRIANGLES, 0, 6 * 6);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, (float*)(&kVertexIndexVector[0]));
+            //指定当前使用的顶点索引缓冲区对象
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, kEBO);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
         }
         m_time += 0.01f;
         glfwSwapBuffers(window);
