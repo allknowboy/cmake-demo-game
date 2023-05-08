@@ -8,8 +8,9 @@ using std::ios;
 Texture2D* Texture2D::LoadFromFile(std::string& image_file_path)
 {
     Texture2D* texture2d = new Texture2D();
-    stbi_set_flip_vertically_on_load(true);//翻转图片，解析出来的图片数据从左下角开始，这是因为OpenGL的纹理坐标起始点为左下角。
+    stbi_set_flip_vertically_on_load(true); //翻转图片，解析出来的图片数据从左下角开始，这是因为OpenGL的纹理坐标起始点为左下角。
     int channels_in_file;//通道数
+    texture2d->mipmap_level_ = 0;
     unsigned char* data = stbi_load(image_file_path.c_str(), &(texture2d->width_), &(texture2d->height_), &channels_in_file, 0);
     int image_data_format = GL_RGB;
     if (data!= nullptr)
@@ -25,13 +26,13 @@ Texture2D* Texture2D::LoadFromFile(std::string& image_file_path)
             case 3:
             {
                 image_data_format = GL_RGB;
-                texture2d->gl_texture_format_ = GL_COMPRESSED_RGB;
+                texture2d->gl_texture_format_ = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
                 break;
             }
             case 4:
             {
                 image_data_format = GL_RGBA;
-                texture2d->gl_texture_format_ = GL_COMPRESSED_RGBA;
+                texture2d->gl_texture_format_ = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                 break;
             }
         }
@@ -47,7 +48,7 @@ Texture2D* Texture2D::LoadFromFile(std::string& image_file_path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
-//释放图片文件内存
+    //释放图片文件内存
     stbi_image_free(data);
     return texture2d;
 }
@@ -71,7 +72,7 @@ void  Texture2D::CompressImageFile(std::string& image_file_path, std::string& sa
     //4. 从GPU中，将显存中保存的压缩好的纹理数据，下载到内存
     auto img = malloc(compress_size);
     glGetCompressedTexImage(GL_TEXTURE_2D, 0, img);
-        //5. 保存为文件
+    //5. 保存为文件
     ofstream output_file_stream(save_image_file_path, ios::out | ios::binary);
     CptFileHead cpt_file_head;
     cpt_file_head.type_[0]='c';
