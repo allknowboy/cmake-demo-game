@@ -89,7 +89,7 @@ void compile_shader()
     //编译Shader
     glCompileShader(fragment_shader);
     //获取编译结果
-    compile_status=GL_FALSE;
+    compile_status = GL_FALSE;
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compile_status);
     if (compile_status == GL_FALSE)
     {
@@ -124,6 +124,8 @@ void processInput(GLFWwindow *window)
 
 int main(int argc, char **argv)
 {
+    VertexRemoveDumplicate();
+    
     init_opengl();
 
     CreateTexture(R"(E:\GitHub\cmake-demo-game\resources\images\cube.png)");
@@ -171,15 +173,15 @@ int main(int argc, char **argv)
 
             //启用顶点Shader属性(a_pos)，指定与顶点坐标数据进行关联
             glEnableVertexAttribArray(vpos_location);
-            glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(glm::vec3), kPositions);
+            glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(Vertex), (&kVertexRemoveDumplicateVector[0]));
 
             //启用顶点Shader属性(a_color)，指定与顶点颜色数据进行关联
             glEnableVertexAttribArray(vcol_location);
-            glVertexAttribPointer(vcol_location, 3, GL_FLOAT, false, sizeof(glm::vec4), kColors);
+            glVertexAttribPointer(vcol_location, 4, GL_FLOAT, false, sizeof(Vertex), ((float*)(&kVertexRemoveDumplicateVector[0])) + 3);
 
             //启用顶点Shader属性(a_uv)，指定与顶点UV数据进行关联
             glEnableVertexAttribArray(a_uv_location);
-            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(glm::vec2), kUvs);
+            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(Vertex), ((float*)(&kVertexRemoveDumplicateVector[0])) + 3 + 4);
             //上传mvp矩阵
             glUniformMatrix4fv(mvp_location, 1, GL_FALSE, &mvp[0][0]);
 
@@ -195,7 +197,8 @@ int main(int argc, char **argv)
             // glBindSampler(0, linearFiltering);
 
             //上传顶点数据并进行绘制
-            glDrawArrays(GL_TRIANGLES, 0, sizeof(kPositions)/sizeof(glm::vec3));
+            // glDrawArrays(GL_TRIANGLES, 0, 6 * 6);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, (float*)(&kVertexIndexVector[0]));
         }
         m_time += 0.01f;
         glfwSwapBuffers(window);

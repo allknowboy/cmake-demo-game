@@ -27,6 +27,6 @@ static const char* fragment_shader_text = R"(
     in vec2 v_uv;
     void main()
     {
-        FragColor = texture2D(u_diffuse_texture, v_uv);
+        FragColor = texture2D(u_diffuse_texture, v_uv) * v_color;
     } 
 )";
