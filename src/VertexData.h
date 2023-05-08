@@ -26,7 +26,7 @@ static const Vertex kVertexs[36] = {
         glm::vec3{ -1.0f, 1.0f, -1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.75f, 0.25f},
         glm::vec3{ -1.0f, 1.0f, -1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.75f, 0.25f},
         glm::vec3{ 1.0f, 1.0f, -1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.75f, 0.5f},
-        glm::vec3{ -1.0f, 1.0f, 1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.5f, 0.5f},
+        glm::vec3{ 1.0f, -1.0f, -1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.5f, 0.5f},
 
         glm::vec3{ -1.0f, -1.0f, -1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.5f, 0.25f},
         glm::vec3{ -1.0f, -1.0f, 1.0f}, glm::vec4(1.0f,1.0f,1.0f,1.0f), glm::vec2{ 0.25f, 0.25f},
