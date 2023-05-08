@@ -4,6 +4,7 @@ project(cmake-demo-game)
 
 set (CMAKE_CXX_STAND 11)
 
+set (SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set (3RD_DIR ${PROJECT_SOURCE_DIR}/3rd)
 set(CMAKE_MODULE_PATH ${3RD_DIR})
 
@@ -38,6 +39,7 @@ set (STB_DIR ${3RD_DIR}/stb)
 # 添加头文件搜索路径
 include_directories (${STB_DIR})
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/tools/compress)
 
 # 设置MSVC编译编码
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")

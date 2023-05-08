@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 {
     init_opengl();
 
-    CreateTexture(R"(D:\GitHub\cmake-demo-game\resources\images\cube.png)");
+    CreateTexture(R"(E:\GitHub\cmake-demo-game\resources\images\cube.png)");
 
     compile_shader();
     //获取shader属性ID
