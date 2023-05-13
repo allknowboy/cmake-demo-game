@@ -12,6 +12,7 @@
 
 #include "VertexData.h"
 #include "ShaderSource.h"
+#include "renderer/mesh_filter.h"
 #include "Texture2D.h"
 
 using namespace std;
@@ -27,6 +28,7 @@ GLuint vertex_shader, fragment_shader, program;
 GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
 Texture2D* texture2d = nullptr;
+MeshFilter* mesh_filter= nullptr;
 float m_rotateX = .0f, m_rotateY = .0f, m_rotateZ = .0f;
 GLuint kVBO, kEBO;
 GLuint kVAO;
@@ -140,14 +142,14 @@ void GeneratorBufferObject()
     //将缓冲区对象指定为顶点缓冲区对象
     glBindBuffer(GL_ARRAY_BUFFER, kVBO);
     //上传顶点数据到缓冲区对象
-    glBufferData(GL_ARRAY_BUFFER, kVertexRemoveDumplicateVector.size() * sizeof(Vertex), &kVertexRemoveDumplicateVector[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mesh_filter->mesh()->vertex_num_ * sizeof(MeshFilter::Vertex), mesh_filter->mesh()->vertex_data_, GL_STATIC_DRAW);
 
     //在GPU上创建缓冲区对象
     glGenBuffers(1, &kEBO);
     //将缓冲区对象指定为顶点索引缓冲区对象
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, kEBO);
     //上传顶点索引数据到缓冲区对象
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, kVertexIndexVector.size() * sizeof(unsigned short), &kVertexIndexVector[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_filter->mesh()->vertex_index_num_ * sizeof(unsigned short), mesh_filter->mesh()->vertex_index_data_, GL_STATIC_DRAW);
 
     // 设置VAO
     glBindVertexArray(kVAO);
@@ -169,11 +171,14 @@ void GeneratorBufferObject()
 
 int main(int argc, char **argv)
 {
-    VertexRemoveDumplicate();
-    
     init_opengl();
+    mesh_filter=new MeshFilter();
+    mesh_filter->LoadMesh(R"(D:\GitHub\cmake-demo-game\resources\cube.mesh)");
+    // VertexRemoveDumplicate();
+    // ExportMesh(R"(D:\GitHub\cmake-demo-game\resources\cube.mesh)");
 
     CreateTexture(R"(D:\GitHub\cmake-demo-game\resources\images\cube.png)");
+
 
     compile_shader();
     //获取shader属性ID
