@@ -10,11 +10,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "VertexData.h"
-#include "ShaderSource.h"
+#include "vertex_data.h"
 #include "renderer/mesh_filter.h"
 #include "renderer/shader.h"
-#include "Texture2D.h"
+#include "renderer/texture2d.h"
+#include "renderer/material.h"
+#include "Utils/application.h"
+
 
 
 using namespace std;
@@ -28,17 +30,10 @@ static void error_callback(int error, const char* description)
 GLFWwindow* window;
 GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
-Texture2D* texture2d = nullptr;
 MeshFilter* mesh_filter= nullptr;
 float m_rotateX = .0f, m_rotateY = .0f, m_rotateZ = .0f;
 GLuint kVBO, kEBO;
 GLuint kVAO;
-
-//创建Texture
-void CreateTexture(std::string image_file_path)
-{
-    texture2d = Texture2D::LoadFromFile(image_file_path);
-}
 
 /// 创建VAO
 void GeneratorVertexArrayObject(){
@@ -117,24 +112,24 @@ void GeneratorBufferObject()
 }
 
 int main(int argc, char **argv)
-{
+{   
+    Application::set_data_path(R"(D:\GitHub\cmake-demo-game\resources\)");
+
     init_opengl();
-    mesh_filter=new MeshFilter();
-    mesh_filter->LoadMesh(R"(D:\GitHub\cmake-demo-game\resources\cube.mesh)");
-    // VertexRemoveDumplicate();
-    // ExportMesh(R"(D:\GitHub\cmake-demo-game\resources\cube.mesh)");
-
-    CreateTexture(R"(D:\GitHub\cmake-demo-game\resources\images\cube.png)");
-
-    Shader* shader = Shader::Find(R"(D:\GitHub\cmake-demo-game\resources\shader/unlit)");
+    mesh_filter = new MeshFilter();
+    mesh_filter->LoadMesh(R"(mesh\cube.mesh)");
+    auto material = new Material();
+    material->Parse("material/cube.mat");
+    //获取`Shader`的`gl_program_id`，指定为目标Shader程序。
+    GLuint gl_program_id = material->shader()->gl_program_id();
 
     //获取shader属性ID
-    mvp_location = glGetUniformLocation(shader->gl_program_id(), "u_mvp");
-    time_location = glGetUniformLocation(shader->gl_program_id(), "u_time");
-    diffuse_texture_location = glGetUniformLocation(shader->gl_program_id(), "u_diffuse_texture");
-    vpos_location = glGetAttribLocation(shader->gl_program_id(), "a_pos");
-    vcol_location = glGetAttribLocation(shader->gl_program_id(), "a_color");
-    a_uv_location = glGetAttribLocation(shader->gl_program_id(), "a_uv");
+    mvp_location = glGetUniformLocation(gl_program_id, "u_mvp");
+    time_location = glGetUniformLocation(gl_program_id, "u_time");
+    diffuse_texture_location = glGetUniformLocation(gl_program_id, "u_diffuse_texture");
+    vpos_location = glGetAttribLocation(gl_program_id, "a_pos");
+    vcol_location = glGetAttribLocation(gl_program_id, "a_color");
+    a_uv_location = glGetAttribLocation(gl_program_id, "a_uv");
 
     GeneratorVertexArrayObject();
     GeneratorBufferObject();
@@ -166,21 +161,24 @@ int main(int argc, char **argv)
         mvp = projection * view * model;
 
         //指定GPU程序(就是指定顶点着色器、片段着色器)
-        glUseProgram(shader->gl_program_id());
+        glUseProgram(gl_program_id);
         {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);//开启背面剔除
             //上传mvp矩阵
             glUniformMatrix4fv(mvp_location, 1, GL_FALSE, &mvp[0][0]);
             glUniform1f(time_location, m_time);
-            //贴图设置
-            //激活纹理单元0
-            //设置Shader程序从纹理单元0读取颜色数据
-            glUniform1i(diffuse_texture_location, 0);
-            glActiveTexture(GL_TEXTURE0 + 0);
-            //将加载的图片纹理句柄，绑定到纹理单元0的Texture2D上。
-            glBindTexture(GL_TEXTURE_2D, texture2d->gl_texture_id_);
-            // glBindSampler(0, linearFiltering);
+             //拿到保存的Texture
+            std::vector<std::pair<std::string,Texture2D*>> textures=material->textures();
+            for (int texture_index = 0; texture_index < textures.size(); ++texture_index) {
+                GLint u_texture_location = glGetUniformLocation(gl_program_id, textures[texture_index].first.c_str());
+                //激活纹理单元0
+                glActiveTexture(GL_TEXTURE0+texture_index);
+                //将加载的图片纹理句柄，绑定到纹理单元0的Texture2D上。
+                glBindTexture(GL_TEXTURE_2D,textures[texture_index].second->gl_texture_id());
+                //设置Shader程序从纹理单元0读取颜色数据
+                glUniform1i(u_texture_location,texture_index);
+            }
             glBindVertexArray(kVAO);
             {
                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);//使用顶点索引进行绘制，最后的0表示数据偏移量。

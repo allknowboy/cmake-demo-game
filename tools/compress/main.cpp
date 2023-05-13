@@ -9,8 +9,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#include "Texture2D.h"
+#include "renderer/texture2d.h"
 
 using namespace std;
 

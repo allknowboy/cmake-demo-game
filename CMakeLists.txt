@@ -8,6 +8,8 @@ set (SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set (3RD_DIR ${PROJECT_SOURCE_DIR}/3rd)
 set(CMAKE_MODULE_PATH ${3RD_DIR})
 
+include_directories (${SRC_DIR})
+
 # glfw
 set (GLFW_DIR ${3RD_DIR}/glfw)
 # 保证glfw dir被编译
@@ -39,22 +41,32 @@ set (STB_DIR ${3RD_DIR}/stb)
 # 添加头文件搜索路径
 include_directories (${STB_DIR})
 
+# yaml
+set (YAML_CPP_DIR ${3RD_DIR}/yaml)
+# 保证easy_profiler被编译
+add_subdirectory (${YAML_CPP_DIR})
+# 添加头文件搜索路径
+include_directories (${YAML_CPP_DIR}/include)
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/tools/compress)
 
 # 设置MSVC编译编码
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 
 add_executable(${PROJECT_NAME}
-src/ShaderSource.h
-src/VertexData.h
-src/Texture2D.h
-src/Texture2D.cpp
+src/vertex_data.h
 src/renderer/mesh_filter.h
 src/renderer/mesh_filter.cpp
 src/renderer/shader.h
 src/renderer/shader.cpp
+src/renderer/material.h
+src/renderer/material.cpp
+src/renderer/texture2d.h
+src/renderer/texture2d.cpp
+src/utils/application.h
+src/utils/application.cpp
 src/main.cpp
 )
 
 # 添加链接库
-target_link_libraries(${PROJECT_NAME} OpenGL32 glfw glad easy_profiler)
+target_link_libraries(${PROJECT_NAME} OpenGL32 glfw glad easy_profiler yaml-cpp)

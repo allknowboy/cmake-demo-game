@@ -16,8 +16,11 @@ include_directories (
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 
 add_executable(${PROJECT_NAME}
+    ${SRC_DIR}/utils/application.h
+    ${SRC_DIR}/utils/application.cpp
+    ${SRC_DIR}/renderer/texture2d.h
+    ${SRC_DIR}/renderer/texture2d.cpp
     main.cpp
-    ${SRC_DIR}/Texture2D.cpp
 )
 
 # 添加链接库
