@@ -10,6 +10,9 @@ set(CMAKE_MODULE_PATH ${3RD_DIR})
 
 include_directories (${SRC_DIR})
 
+# tiny_obj_loader
+include_directories (${3RD_DIR}/tiny_obj_loader/include)
+
 # glfw
 set (GLFW_DIR ${3RD_DIR}/glfw)
 # 保证glfw dir被编译

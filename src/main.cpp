@@ -77,10 +77,10 @@ int main(int argc, char **argv)
 
     init_opengl();
     auto mesh_filter = new MeshFilter();
-    mesh_filter->LoadMesh(R"(mesh\cube.mesh)");
+    mesh_filter->LoadObj(R"(obj\tree.obj)");
 
     auto material = new Material();
-    material->Parse("material/cube.mat");
+    material->Parse("material/unknow.mat");
 
     auto mesh_renderer=new MeshRenderer();
     mesh_renderer->SetMeshFilter(mesh_filter);
@@ -97,18 +97,17 @@ int main(int argc, char **argv)
         ratio = width / (float) height;
 
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(49.f/255, 77.f/255, 121.f/255, 1.f);
-
-        m_rotateX += 0.1f;
-        m_rotateY += 0.5f;
-        m_rotateZ += 0.3f;
+        m_rotateX += 0.5f;
+        // m_rotateY += 0.5f;
+        // m_rotateZ += 0.3f;
         //坐标系变换
         glm::mat4 trans = glm::translate(glm::vec3(0, 0, 0)); //不移动顶点坐标;
         glm::mat4 rotation = glm::eulerAngleYXZ(glm::radians(m_rotateX), glm::radians(m_rotateY), glm::radians(m_rotateZ)); //使用欧拉角旋转;
-        glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)); //缩放;
+        glm::mat4 scale = glm::scale(glm::vec3(0.2f, 0.2f, 0.2f)); //缩放;
         model = trans * scale * rotation;
-        view = glm::lookAt(glm::vec3(0, 0, 300), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        view = glm::lookAt(glm::vec3(0, -100, 500), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         projection = glm::perspective(glm::radians(60.f), ratio, 1.f, 1000.f);
         mvp = projection * view * model;
         m_time += 0.01f;

@@ -41,6 +41,7 @@ void MeshRenderer::Render() {
         glGenBuffers(1, &vertex_buffer_object_);
         //将缓冲区对象指定为顶点缓冲区对象
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_);
+
         //上传顶点数据到缓冲区对象
         glBufferData(GL_ARRAY_BUFFER, mesh_filter_->mesh()->vertex_num_ * sizeof(MeshFilter::Vertex), mesh_filter_->mesh()->vertex_data_, GL_STATIC_DRAW);
 
@@ -61,9 +62,9 @@ void MeshRenderer::Render() {
             // 将Shader变量(a_pos)和顶点坐标VBO句柄进行关联，最后的0表示数据偏移量。
             glVertexAttribPointer(vpos_location, 3, GL_FLOAT, false, sizeof(MeshFilter::Vertex), 0);
             // 启用顶点Shader属性(a_color)，指定与顶点颜色数据进行关联
-            glVertexAttribPointer(vcol_location, 4, GL_FLOAT, false, sizeof(MeshFilter::Vertex), (void*)(sizeof(float)*3));
+            glVertexAttribPointer(vcol_location, 4, GL_FLOAT, false, sizeof(MeshFilter::Vertex), (void*)(sizeof(float) * 3));
             // 将Shader变量(a_uv)和顶点UV坐标VBO句柄进行关联，最后的0表示数据偏移量。
-            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(MeshFilter::Vertex), (void*)(sizeof(float)*(3+4)));
+            glVertexAttribPointer(a_uv_location, 2, GL_FLOAT, false, sizeof(MeshFilter::Vertex), (void*)(sizeof(float) * (3 + 4)));
 
             glEnableVertexAttribArray(vpos_location);
             glEnableVertexAttribArray(vcol_location);
@@ -78,7 +79,7 @@ void MeshRenderer::Render() {
     glUseProgram(gl_program_id);
     {
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);//开启背面剔除
+        glEnable(GL_CULL_FACE); // 开启背面剔除
         //上传mvp矩阵
         glUniformMatrix4fv(glGetUniformLocation(gl_program_id, "u_mvp"), 1, GL_FALSE, &mvp_[0][0]);
         glUniform1f(glGetUniformLocation(gl_program_id, "u_timr"), time_);
@@ -95,7 +96,7 @@ void MeshRenderer::Render() {
         }
         glBindVertexArray(vertex_array_object_);
         {
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);//使用顶点索引进行绘制，最后的0表示数据偏移量。
+            glDrawElements(GL_TRIANGLES, mesh_filter_->mesh()->vertex_index_num_, GL_UNSIGNED_SHORT, 0);//使用顶点索引进行绘制，最后的0表示数据偏移量。
         }
         glBindVertexArray(0);
     }

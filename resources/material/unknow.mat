@@ -1,0 +1,5 @@
+material:
+  shader: shader/Unlit
+  texture:
+    - name: u_diffuse_texture
+      image: image/unknow.png
