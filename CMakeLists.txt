@@ -63,6 +63,8 @@ src/renderer/material.h
 src/renderer/material.cpp
 src/renderer/texture2d.h
 src/renderer/texture2d.cpp
+src/renderer/mesh_renderer.h
+src/renderer/mesh_renderer.cpp
 src/utils/application.h
 src/utils/application.cpp
 src/main.cpp
