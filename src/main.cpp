@@ -13,7 +13,9 @@
 #include "VertexData.h"
 #include "ShaderSource.h"
 #include "renderer/mesh_filter.h"
+#include "renderer/shader.h"
 #include "Texture2D.h"
+
 
 using namespace std;
 
@@ -24,7 +26,6 @@ static void error_callback(int error, const char* description)
 }
 
 GLFWwindow* window;
-GLuint vertex_shader, fragment_shader, program;
 GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
 Texture2D* texture2d = nullptr;
@@ -74,60 +75,6 @@ void init_opengl()
     glfwSwapInterval(1);
 }
 
-
-/// 编译、链接Shader
-void compile_shader()
-{
-    //创建顶点Shader
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    //指定Shader源码
-    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-    //编译Shader
-    glCompileShader(vertex_shader);
-    //获取编译结果
-    GLint compile_status=GL_FALSE;
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compile_status);
-    if (compile_status == GL_FALSE)
-    {
-        GLchar message[256];
-        glGetShaderInfoLog(vertex_shader, sizeof(message), 0, message);
-        cout<<"compile vs error:"<<message<<endl;
-    }
-
-    //创建片段Shader
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    //指定Shader源码
-    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-    //编译Shader
-    glCompileShader(fragment_shader);
-    //获取编译结果
-    compile_status = GL_FALSE;
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compile_status);
-    if (compile_status == GL_FALSE)
-    {
-        GLchar message[256];
-        glGetShaderInfoLog(fragment_shader, sizeof(message), 0, message);
-        cout<<"compile fs error:"<<message<<endl;
-    }
-
-
-    //创建GPU程序
-    program = glCreateProgram();
-    //附加Shader
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    //Link
-    glLinkProgram(program);
-    //获取编译结果
-    GLint link_status=GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &link_status);
-    if (link_status == GL_FALSE)
-    {
-        GLchar message[256];
-        glGetProgramInfoLog(program, sizeof(message), 0, message);
-        cout<<"link error:"<<message<<endl;
-    }
-}
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -179,15 +126,15 @@ int main(int argc, char **argv)
 
     CreateTexture(R"(D:\GitHub\cmake-demo-game\resources\images\cube.png)");
 
+    Shader* shader = Shader::Find(R"(D:\GitHub\cmake-demo-game\resources\shader/unlit)");
 
-    compile_shader();
     //获取shader属性ID
-    mvp_location = glGetUniformLocation(program, "u_mvp");
-    time_location = glGetUniformLocation(program, "u_time");
-    diffuse_texture_location = glGetUniformLocation(program, "u_diffuse_texture");
-    vpos_location = 0;
-    vcol_location = 1;
-    a_uv_location = 2;
+    mvp_location = glGetUniformLocation(shader->gl_program_id(), "u_mvp");
+    time_location = glGetUniformLocation(shader->gl_program_id(), "u_time");
+    diffuse_texture_location = glGetUniformLocation(shader->gl_program_id(), "u_diffuse_texture");
+    vpos_location = glGetAttribLocation(shader->gl_program_id(), "a_pos");
+    vcol_location = glGetAttribLocation(shader->gl_program_id(), "a_color");
+    a_uv_location = glGetAttribLocation(shader->gl_program_id(), "a_uv");
 
     GeneratorVertexArrayObject();
     GeneratorBufferObject();
@@ -219,7 +166,7 @@ int main(int argc, char **argv)
         mvp = projection * view * model;
 
         //指定GPU程序(就是指定顶点着色器、片段着色器)
-        glUseProgram(program);
+        glUseProgram(shader->gl_program_id());
         {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);//开启背面剔除

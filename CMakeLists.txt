@@ -49,9 +49,11 @@ src/ShaderSource.h
 src/VertexData.h
 src/Texture2D.h
 src/Texture2D.cpp
-src/main.cpp
 src/renderer/mesh_filter.h
 src/renderer/mesh_filter.cpp
+src/renderer/shader.h
+src/renderer/shader.cpp
+src/main.cpp
 )
 
 # 添加链接库
