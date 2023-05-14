@@ -42,7 +42,7 @@ void MeshFilter::LoadObj(string obj_file_path) {
     };
     // mtllib回调
     cb.mtllib_cb = [](void *user_data, const tinyobj::material_t *materials, int num_materials) {
-
+        printf("mtllib. # of materials = %d\n", num_materials);
     };
     // 顶点回调
     cb.vertex_cb = [](void *user_data, float x, float y, float z, float w){
@@ -80,7 +80,11 @@ void MeshFilter::LoadObj(string obj_file_path) {
     };
     // 使用材质回调
     cb.usemtl_cb = [](void *user_data, const char *name, int material_idx){
-
+        if (material_idx > -1) {
+            printf("usemtl. material id = %d\n", material_idx);
+        } else {
+            printf("usemtl. name = %s\n", name);
+        }
     };
     // 组回调
     cb.group_cb = [](void *user_data, const char **names, int num_names){
@@ -95,14 +99,15 @@ void MeshFilter::LoadObj(string obj_file_path) {
     objMesh_ = new ObjMesh();
     std::string warn;
     std::string err;
-    tinyobj::LoadObjWithCallback(ifs, cb, objMesh_, nullptr, &err);
+    tinyobj::MaterialFileReader mtlReader((Application::data_path() + "obj/").c_str());
+    tinyobj::LoadObjWithCallback(ifs, cb, objMesh_, &mtlReader, &err);
     if (!err.empty()) {
         std::cerr << err << std::endl;
     }
     mesh_ = new Mesh();
     size_t n = objMesh_->vertices.size();
     for (int i = 0; i < n; ++i) {
-        objMesh_->vertex_data.push_back(Vertex{objMesh_->vertices[i], glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0.5f, 0.5f)});
+        objMesh_->vertex_data.push_back(Vertex{objMesh_->vertices[i], glm::vec4(1.f, 1.f, 1.f, 1.f), objMesh_->texcoords[i]});
     }
     mesh_->vertex_num_ = n;
     mesh_->vertex_index_num_ = objMesh_->v_indices.size();
