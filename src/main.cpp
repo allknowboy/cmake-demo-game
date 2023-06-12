@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 
     //创建GameObject
     GameObject* go = new GameObject("Tree");
+    go->set_layer(0x01);
     auto transform = go->AddComponent<Transform>();
 
     //挂上 MeshFilter 组件
@@ -98,6 +99,8 @@ int main(int argc, char **argv)
     transform_camera_1->set_position(glm::vec3(0, 0, 10));
     //挂上 Camera 组件
     auto camera_1 = dynamic_cast<Camera*>(go_camera_1->AddComponent("Camera"));
+    camera_1->set_depth(0);
+    camera_1->set_culling_mask(0x01);
 
     //创建相机2 GameObject
     auto go_camera_2 = new GameObject("main_camera");
@@ -108,6 +111,8 @@ int main(int argc, char **argv)
     auto camera_2 = dynamic_cast<Camera*>(go_camera_2->AddComponent("Camera"));
     //第二个相机不能清除之前的颜色。不然用第一个相机矩阵渲染的物体就被清除 没了。
     camera_2->set_clear_flag(GL_DEPTH_BUFFER_BIT);
+    camera_2->set_depth(1);
+    camera_2->set_culling_mask(0x01|0x02);
 
     while (!glfwWindowShouldClose(window))
     {

@@ -43,10 +43,27 @@ void Camera::Clear() {
     glClearColor(clear_color_.r, clear_color_.g, clear_color_.b, clear_color_.a);
 }
 
-void Camera::Foreach(std::function<void()> func) {
+void Camera::set_depth(unsigned char depth)
+{
+    if(depth_ == depth){
+        return;
+    }
+    depth_ = depth;
+    Sort();
+}
+
+void Camera::Foreach(std::function<void()> func)
+{
     for (auto iter = all_camera_.begin();iter != all_camera_.end(); iter++){
         current_camera_ = *iter;
         current_camera_->Clear();
         func();
     }
+}
+
+void Camera::Sort()
+{
+    std::sort(all_camera_.begin(),all_camera_.end(), [](Camera* a, Camera* b) {
+        return a->depth() < b->depth();
+    });
 }
