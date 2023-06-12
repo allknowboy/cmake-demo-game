@@ -44,10 +44,10 @@ void MeshRenderer::Render() {
     }
     glm::mat4 trans = glm::translate(transform->position());
     auto rotation = transform->rotation();
-    glm::mat4 eulerAngleYXZ = glm::eulerAngleYXZ(glm::radians(rotation.y), glm::radians(rotation.x), glm::radians(rotation.z));
+    glm::mat4 eulerAngleYXZ = glm::eulerAngleYXZ(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
     glm::mat4 scale = glm::scale(transform->scale()); //缩放;
     glm::mat4 model = trans * scale * eulerAngleYXZ;
-    glm::mat4 mvp= projection_ * view_ * model;
+    glm::mat4 mvp = projection_ * view_ * model;
 
     //主动获取 MeshFilter 组件
     auto component_mesh_filter=game_object()->GetComponent("MeshFilter");

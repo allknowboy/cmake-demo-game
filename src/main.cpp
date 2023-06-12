@@ -73,7 +73,7 @@ void processInput(GLFWwindow *window)
 
 int main(int argc, char **argv)
 {   
-    Application::set_data_path(R"(E:\GitHub\cmake-demo-game\resources\)");
+    Application::set_data_path(R"(D:\GitHub\cmake-demo-game\resources\)");
     init_opengl();
 
     //创建GameObject
@@ -104,14 +104,13 @@ int main(int argc, char **argv)
         glClearColor(49.f/255, 77.f/255, 121.f/255, 1.f);
         //坐标系变换
         //旋转物体
-        static float rotate_eulerAngle=0.f;
-        rotate_eulerAngle += 0.1f;
         glm::vec3 rotation = transform->rotation();
-        rotation.y = rotate_eulerAngle;
+        rotation.y += 0.5f;
+        rotation.x -= 0.5f;
         transform->set_rotation(rotation);
-
-        glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0, 0,0), glm::vec3(0, 1, 0));
-        glm::mat4 projection = glm::perspective(glm::radians(60.f),ratio,1.f,1000.f);
+        transform->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
+        glm::mat4 view = glm::lookAt(glm::vec3(0, -100, 500), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 projection = glm::perspective(glm::radians(60.f), ratio, 1.f, 1000.f);
         mesh_renderer->SetView(view);
         mesh_renderer->SetProjection(projection);
         m_time += 0.01f;
