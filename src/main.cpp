@@ -91,13 +91,23 @@ int main(int argc, char **argv)
     material->Parse("material/unknow.mat");
     mesh_renderer->SetMaterial(material);
 
-    //创建相机 GameObject
-    auto go_camera = new GameObject("main_camera");
+    //创建相机1 GameObject
+    auto go_camera_1 = new GameObject("main_camera");
     //挂上 Transform 组件
-    auto transform_camera=dynamic_cast<Transform*>(go_camera->AddComponent("Transform"));
-    transform_camera->set_position(glm::vec3(0, 0, 10));
+    auto transform_camera_1 = dynamic_cast<Transform*>(go_camera_1->AddComponent("Transform"));
+    transform_camera_1->set_position(glm::vec3(0, 0, 10));
     //挂上 Camera 组件
-    auto camera = dynamic_cast<Camera*>(go_camera->AddComponent("Camera"));
+    auto camera_1 = dynamic_cast<Camera*>(go_camera_1->AddComponent("Camera"));
+
+    //创建相机2 GameObject
+    auto go_camera_2 = new GameObject("main_camera");
+    //挂上 Transform 组件
+    auto transform_camera_2 = dynamic_cast<Transform*>(go_camera_2->AddComponent("Transform"));
+    transform_camera_2->set_position(glm::vec3(5, 0, 10));
+    //挂上 Camera 组件
+    auto camera_2 = dynamic_cast<Camera*>(go_camera_2->AddComponent("Camera"));
+    //第二个相机不能清除之前的颜色。不然用第一个相机矩阵渲染的物体就被清除 没了。
+    camera_2->set_clear_flag(GL_DEPTH_BUFFER_BIT);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -108,10 +118,14 @@ int main(int argc, char **argv)
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
 
-        //设置相机
-        camera->SetView(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        camera->SetProjection(60.f, ratio, 1.f, 1000.f);
-        camera->Clear();
+        //设置相机1
+        camera_1->SetView(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        camera_1->SetProjection(60.f, ratio, 1.f, 1000.f);
+
+        //设置相机2
+        camera_2->SetView(glm::vec3(0.1, 0, 0), glm::vec3(0, 1, 0));
+        camera_2->SetProjection(60.f, ratio, 1.f, 1000.f);
+
         //旋转物体
         glm::vec3 rotation = transform->rotation();
         rotation.y += 0.5f;
@@ -120,11 +134,11 @@ int main(int argc, char **argv)
         transform->set_scale(glm::vec3(0.001f, 0.001f, 0.001f));
         transform->set_position(glm::vec3(0, 0.01, 0));
 
-        mesh_renderer->SetView(camera->view_mat4());
-        mesh_renderer->SetProjection(camera->projection_mat4());
-        m_time += 0.01f;
-        mesh_renderer->SetTime(m_time);
-        mesh_renderer->Render();
+        //遍历所有相机，每个相机的View Projection，都用来做一次渲染。
+        Camera::Foreach([&](){
+            mesh_renderer->Render();
+        });
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

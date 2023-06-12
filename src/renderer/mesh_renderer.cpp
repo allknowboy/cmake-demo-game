@@ -7,6 +7,7 @@
 #include "mesh_filter.h"
 #include "texture2d.h"
 #include "shader.h"
+#include "camera.h"
 #include <rttr/registration>
 #include "component/game_object.h"
 #include "component/transform.h"
@@ -31,11 +32,15 @@ void MeshRenderer::SetMaterial(Material *material) {
     material_ = material;
 }
 
-void MeshRenderer::SetTime(float time) {
-    time_ = time;
-}
-
 void MeshRenderer::Render() {
+    //从当前Camera获取View Projection
+    auto current_camera=Camera::current_camera();
+    if (current_camera== nullptr){
+        return;
+    }
+    glm::mat4 view = current_camera->view_mat4();
+    glm::mat4 projection = current_camera->projection_mat4();
+
     //主动获取 Transform 组件，计算mvp。
     auto component_transform = game_object()->GetComponent("Transform");
     auto transform = dynamic_cast<Transform*>(component_transform);
@@ -47,7 +52,7 @@ void MeshRenderer::Render() {
     glm::mat4 eulerAngleYXZ = glm::eulerAngleYXZ(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
     glm::mat4 scale = glm::scale(transform->scale()); //缩放;
     glm::mat4 model = trans * scale * eulerAngleYXZ;
-    glm::mat4 mvp = projection_ * view_ * model;
+    glm::mat4 mvp = projection * view * model;
 
     //主动获取 MeshFilter 组件
     auto component_mesh_filter=game_object()->GetComponent("MeshFilter");
@@ -108,7 +113,7 @@ void MeshRenderer::Render() {
         glEnable(GL_CULL_FACE); // 开启背面剔除
         //上传mvp矩阵
         glUniformMatrix4fv(glGetUniformLocation(gl_program_id, "u_mvp"), 1, GL_FALSE, &mvp[0][0]);
-        glUniform1f(glGetUniformLocation(gl_program_id, "u_timr"), time_);
+        glUniform1f(glGetUniformLocation(gl_program_id, "u_timr"), 0);
         //拿到保存的Texture
         std::vector<std::pair<std::string,Texture2D*>> textures = material_->textures();
         for (int texture_index = 0; texture_index < textures.size(); ++texture_index) {

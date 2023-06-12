@@ -92,6 +92,8 @@
         "any": "cpp",
         "complex": "cpp",
         "filesystem": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "random": "cpp",
+        "regex": "cpp"
     }
 }

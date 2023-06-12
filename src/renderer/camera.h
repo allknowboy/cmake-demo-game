@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+#include <functional>
 #include <glm/glm.hpp>
 #include "component/component.h"
 
@@ -21,11 +23,21 @@ public:
     // 设置刷帧清屏内容种类
     void set_clear_flag(unsigned int clear_flag){clear_flag_=clear_flag;}
     void Clear();
+
+    /// 遍历所有Camera
+    static void Foreach(std::function<void()> func);
+
+    /// 遍历all_camera_时，轮到的那个Camera。
+    static Camera* current_camera(){ return current_camera_; }
+
 private:
 
     glm::mat4 view_mat4_; // 指定相机坐标和朝向
     glm::mat4 projection_mat4_; // 指定相机范围
     glm::vec4 clear_color_; // 清屏颜色
     unsigned int clear_flag_; //刷新数据标志
+
+    static std::vector<Camera*> all_camera_; // 所有Camera，每一帧都遍历Camera，设置current_camera_。
+    static Camera* current_camera_; // 当前用于渲染的Camera，就是MeshRenderer在计算MVP的时候，用这个Camera的View Projection矩阵计算MVP。
 };
 
