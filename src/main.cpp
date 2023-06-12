@@ -17,6 +17,7 @@
 #include "renderer/material.h"
 #include "renderer/mesh_renderer.h"
 #include "Utils/application.h"
+#include "renderer/camera.h"
 
 #include "component/component.h"
 #include "component/game_object.h"
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
     init_opengl();
 
     //创建GameObject
-    GameObject* go = new GameObject("Ball");
+    GameObject* go = new GameObject("Tree");
     auto transform = go->AddComponent<Transform>();
 
     //挂上 MeshFilter 组件
@@ -90,6 +91,14 @@ int main(int argc, char **argv)
     material->Parse("material/unknow.mat");
     mesh_renderer->SetMaterial(material);
 
+    //创建相机 GameObject
+    auto go_camera = new GameObject("main_camera");
+    //挂上 Transform 组件
+    auto transform_camera=dynamic_cast<Transform*>(go_camera->AddComponent("Transform"));
+    transform_camera->set_position(glm::vec3(0, 0, 10));
+    //挂上 Camera 组件
+    auto camera = dynamic_cast<Camera*>(go_camera->AddComponent("Camera"));
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -99,20 +108,20 @@ int main(int argc, char **argv)
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
 
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(49.f/255, 77.f/255, 121.f/255, 1.f);
-        //坐标系变换
+        //设置相机
+        camera->SetView(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        camera->SetProjection(60.f, ratio, 1.f, 1000.f);
+        camera->Clear();
         //旋转物体
         glm::vec3 rotation = transform->rotation();
         rotation.y += 0.5f;
         rotation.x -= 0.5f;
         transform->set_rotation(rotation);
-        transform->set_scale(glm::vec3(0.1f, 0.1f, 0.1f));
-        glm::mat4 view = glm::lookAt(glm::vec3(0, -100, 500), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        glm::mat4 projection = glm::perspective(glm::radians(60.f), ratio, 1.f, 1000.f);
-        mesh_renderer->SetView(view);
-        mesh_renderer->SetProjection(projection);
+        transform->set_scale(glm::vec3(0.001f, 0.001f, 0.001f));
+        transform->set_position(glm::vec3(0, 0.01, 0));
+
+        mesh_renderer->SetView(camera->view_mat4());
+        mesh_renderer->SetProjection(camera->projection_mat4());
         m_time += 0.01f;
         mesh_renderer->SetTime(m_time);
         mesh_renderer->Render();
