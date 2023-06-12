@@ -4,10 +4,18 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 #include <iostream>
+#include <rttr/registration>
 
 
 using std::ifstream;
 using std::ios;
+
+using namespace rttr;
+RTTR_REGISTRATION
+{
+    registration::class_<MeshFilter>("MeshFilter")
+            .constructor<>()(rttr::policy::ctor::as_raw_ptr);
+}
 
 
 MeshFilter::MeshFilter()

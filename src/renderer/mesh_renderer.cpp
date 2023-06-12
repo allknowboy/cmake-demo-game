@@ -1,9 +1,23 @@
 #include "mesh_renderer.h"
 #include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform2.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include "material.h"
 #include "mesh_filter.h"
 #include "texture2d.h"
 #include "shader.h"
+#include <rttr/registration>
+#include "component/game_object.h"
+#include "component/transform.h"
+
+using namespace rttr;
+RTTR_REGISTRATION
+{
+registration::class_<MeshRenderer>("MeshRenderer")
+.constructor<>()(rttr::policy::ctor::as_raw_ptr);
+}
+
 
 MeshRenderer::MeshRenderer() {
 
@@ -17,19 +31,31 @@ void MeshRenderer::SetMaterial(Material *material) {
     material_ = material;
 }
 
-void MeshRenderer::SetMeshFilter(MeshFilter *mesh_filter) {
-    mesh_filter_ = mesh_filter;
-}
-
-void MeshRenderer::SetMVP(glm::mat4 mvp) {
-    mvp_ = mvp;
-}
-
 void MeshRenderer::SetTime(float time) {
     time_ = time;
 }
 
 void MeshRenderer::Render() {
+    //主动获取 Transform 组件，计算mvp。
+    auto component_transform = game_object()->GetComponent("Transform");
+    auto transform = dynamic_cast<Transform*>(component_transform);
+    if(!transform){
+        return;
+    }
+    glm::mat4 trans = glm::translate(transform->position());
+    auto rotation = transform->rotation();
+    glm::mat4 eulerAngleYXZ = glm::eulerAngleYXZ(glm::radians(rotation.y), glm::radians(rotation.x), glm::radians(rotation.z));
+    glm::mat4 scale = glm::scale(transform->scale()); //缩放;
+    glm::mat4 model = trans * scale * eulerAngleYXZ;
+    glm::mat4 mvp= projection_ * view_ * model;
+
+    //主动获取 MeshFilter 组件
+    auto component_mesh_filter=game_object()->GetComponent("MeshFilter");
+    auto mesh_filter = dynamic_cast<MeshFilter*>(component_mesh_filter);
+    if(!mesh_filter){
+        return;
+    }
+
     //获取`Shader`的`gl_program_id`，指定为目标Shader程序。
     GLuint gl_program_id = material_->shader()->gl_program_id();
     if(vertex_array_object_ == 0){
@@ -43,14 +69,14 @@ void MeshRenderer::Render() {
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_);
 
         //上传顶点数据到缓冲区对象
-        glBufferData(GL_ARRAY_BUFFER, mesh_filter_->mesh()->vertex_num_ * sizeof(MeshFilter::Vertex), mesh_filter_->mesh()->vertex_data_, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh_filter->mesh()->vertex_num_ * sizeof(MeshFilter::Vertex), mesh_filter->mesh()->vertex_data_, GL_STATIC_DRAW);
 
         //在GPU上创建缓冲区对象
         glGenBuffers(1, &element_buffer_object_);
         //将缓冲区对象指定为顶点索引缓冲区对象
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object_);
         //上传顶点索引数据到缓冲区对象
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_filter_->mesh()->vertex_index_num_ * sizeof(unsigned short), mesh_filter_->mesh()->vertex_index_data_, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_filter->mesh()->vertex_index_num_ * sizeof(unsigned short), mesh_filter->mesh()->vertex_index_data_, GL_STATIC_DRAW);
 
         glGenVertexArrays(1, &vertex_array_object_);
 
@@ -81,7 +107,7 @@ void MeshRenderer::Render() {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE); // 开启背面剔除
         //上传mvp矩阵
-        glUniformMatrix4fv(glGetUniformLocation(gl_program_id, "u_mvp"), 1, GL_FALSE, &mvp_[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(gl_program_id, "u_mvp"), 1, GL_FALSE, &mvp[0][0]);
         glUniform1f(glGetUniformLocation(gl_program_id, "u_timr"), time_);
         //拿到保存的Texture
         std::vector<std::pair<std::string,Texture2D*>> textures = material_->textures();
@@ -96,7 +122,7 @@ void MeshRenderer::Render() {
         }
         glBindVertexArray(vertex_array_object_);
         {
-            glDrawElements(GL_TRIANGLES, mesh_filter_->mesh()->vertex_index_num_, GL_UNSIGNED_SHORT, 0);//使用顶点索引进行绘制，最后的0表示数据偏移量。
+            glDrawElements(GL_TRIANGLES, mesh_filter->mesh()->vertex_index_num_, GL_UNSIGNED_SHORT, 0);//使用顶点索引进行绘制，最后的0表示数据偏移量。
         }
         glBindVertexArray(0);
     }

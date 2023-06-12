@@ -70,6 +70,12 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 
 add_executable(${PROJECT_NAME}
 src/vertex_data.h
+src/component/component.cpp
+src/component/component.h
+src/component/game_object.cpp
+src/component/game_object.h
+src/component/transform.cpp
+src/component/transform.h
 src/renderer/mesh_filter.h
 src/renderer/mesh_filter.cpp
 src/renderer/shader.h

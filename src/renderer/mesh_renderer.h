@@ -1,11 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "component/component.h"
 
 class Material;
 class MeshFilter;
 class Texture2D;
-class MeshRenderer {
+class MeshRenderer : public Component {
 public:
     MeshRenderer();
     ~MeshRenderer();
@@ -13,15 +14,14 @@ public:
     void SetMaterial(Material* material); // 设置Material
     Material* material(){ return material_; }
 
-    void SetMeshFilter(MeshFilter* mesh_filter);
-    MeshFilter* mesh_filter(){ return mesh_filter_; }
-    void SetMVP(glm::mat4 mvp);
+    void SetView(glm::mat4 view){ view_ = view; };
+    void SetProjection(glm::mat4 projection){ projection_ = projection; };
     void SetTime(float time);
     void Render();//渲染
 private:
     Material* material_;
-    MeshFilter* mesh_filter_;
-    glm::mat4 mvp_;
+    glm::mat4 view_;
+    glm::mat4 projection_;
     float time_;
 
     unsigned int vertex_buffer_object_ = 0; // 顶点缓冲区对象

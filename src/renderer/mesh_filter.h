@@ -3,11 +3,12 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
+#include "component/component.h"
 
 using std::vector;
 using std::string;
 
-class MeshFilter {
+class MeshFilter : public Component {
 public:
     MeshFilter();
     ~MeshFilter();

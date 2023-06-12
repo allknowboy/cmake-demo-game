@@ -18,6 +18,9 @@
 #include "renderer/mesh_renderer.h"
 #include "Utils/application.h"
 
+#include "component/component.h"
+#include "component/game_object.h"
+#include "component/transform.h"
 
 
 using namespace std;
@@ -29,10 +32,7 @@ static void error_callback(int error, const char* description)
 }
 
 GLFWwindow* window;
-GLint mvp_location, time_location, diffuse_texture_location, vpos_location, vcol_location, a_uv_location;
 float m_time = 0.f;
-float m_rotateX = .0f, m_rotateY = .0f, m_rotateZ = .0f;
-
 
 /// 初始化OpenGL
 void init_opengl()
@@ -73,24 +73,27 @@ void processInput(GLFWwindow *window)
 
 int main(int argc, char **argv)
 {   
-    Application::set_data_path(R"(D:\GitHub\cmake-demo-game\resources\)");
-
+    Application::set_data_path(R"(E:\GitHub\cmake-demo-game\resources\)");
     init_opengl();
-    auto mesh_filter = new MeshFilter();
+
+    //创建GameObject
+    GameObject* go = new GameObject("Ball");
+    auto transform = go->AddComponent<Transform>();
+
+    //挂上 MeshFilter 组件
+    auto mesh_filter = dynamic_cast<MeshFilter*>(go->AddComponent("MeshFilter"));
     mesh_filter->LoadObj(R"(obj\tree.obj)");
+    //挂上MeshRenderer 组件
+    auto mesh_renderer = dynamic_cast<MeshRenderer*>(go->AddComponent("MeshRenderer"));
 
     auto material = new Material();
     material->Parse("material/unknow.mat");
-
-    auto mesh_renderer=new MeshRenderer();
-    mesh_renderer->SetMeshFilter(mesh_filter);
     mesh_renderer->SetMaterial(material);
 
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
         int width, height;
-        glm::mat4 model, view, projection, mvp;
 
         //获取画面宽高
         glfwGetFramebufferSize(window, &width, &height);
@@ -99,19 +102,19 @@ int main(int argc, char **argv)
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(49.f/255, 77.f/255, 121.f/255, 1.f);
-        m_rotateX += 0.5f;
-        // m_rotateY += 0.5f;
-        // m_rotateZ += 0.3f;
         //坐标系变换
-        glm::mat4 trans = glm::translate(glm::vec3(0, 0, 0)); //不移动顶点坐标;
-        glm::mat4 rotation = glm::eulerAngleYXZ(glm::radians(m_rotateX), glm::radians(m_rotateY), glm::radians(m_rotateZ)); //使用欧拉角旋转;
-        glm::mat4 scale = glm::scale(glm::vec3(0.2f, 0.2f, 0.2f)); //缩放;
-        model = trans * scale * rotation;
-        view = glm::lookAt(glm::vec3(0, -100, 500), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        projection = glm::perspective(glm::radians(60.f), ratio, 1.f, 1000.f);
-        mvp = projection * view * model;
+        //旋转物体
+        static float rotate_eulerAngle=0.f;
+        rotate_eulerAngle += 0.1f;
+        glm::vec3 rotation = transform->rotation();
+        rotation.y = rotate_eulerAngle;
+        transform->set_rotation(rotation);
+
+        glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 10), glm::vec3(0, 0,0), glm::vec3(0, 1, 0));
+        glm::mat4 projection = glm::perspective(glm::radians(60.f),ratio,1.f,1000.f);
+        mesh_renderer->SetView(view);
+        mesh_renderer->SetProjection(projection);
         m_time += 0.01f;
-        mesh_renderer->SetMVP(mvp);
         mesh_renderer->SetTime(m_time);
         mesh_renderer->Render();
         glfwSwapBuffers(window);

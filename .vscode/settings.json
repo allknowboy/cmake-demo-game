@@ -87,6 +87,11 @@
         "xutility": "cpp",
         "queue": "cpp",
         "ranges": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "registration": "cpp",
+        "any": "cpp",
+        "complex": "cpp",
+        "filesystem": "cpp",
+        "typeindex": "cpp"
     }
 }

@@ -21,3 +21,10 @@ add_executable(
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt rttr_core_lib)
+
+add_executable(
+    "${PROJECT_NAME}2"
+    src/test.cpp
+)
+
+target_link_libraries("${PROJECT_NAME}2" PRIVATE fmt::fmt rttr_core_lib)
