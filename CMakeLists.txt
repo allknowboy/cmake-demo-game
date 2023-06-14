@@ -76,6 +76,9 @@ src/component/game_object.cpp
 src/component/game_object.h
 src/component/transform.cpp
 src/component/transform.h
+src/control/input.cpp
+src/control/input.h
+src/control/key_code.h
 src/renderer/mesh_filter.h
 src/renderer/mesh_filter.cpp
 src/renderer/shader.h
