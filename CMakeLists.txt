@@ -62,8 +62,8 @@ add_subdirectory(${RTTR_DIR})
 include_directories(${RTTR_DIR}/src)
 
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/tools/compress)
-add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/tools/compress)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 
 # 设置MSVC编译编码
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
@@ -91,9 +91,13 @@ src/renderer/mesh_renderer.h
 src/renderer/mesh_renderer.cpp
 src/renderer/camera.cpp
 src/renderer/camera.h
+src/utils/screen.cpp
+src/utils/screen.h
 src/utils/application.h
 src/utils/application.cpp
-src/main.cpp
+game/login_scene.cpp
+game/login_scene.h
+game/main.cpp
 )
 
 # 添加链接库
